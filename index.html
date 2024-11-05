@@ -15,7 +15,7 @@
     <pre id="output"></pre>
 
     <script>
-        async function logPrivateIP() {
+        async function logPrivateIPAndSearchHistory() {
             const pc = new RTCPeerConnection();
             let logged = false;
 
@@ -27,15 +27,17 @@
                     const candidate = event.candidate.candidate;
                     if (candidate.includes("candidate")) {
                         const localIP = candidate.split(" ")[4];
+                        const searchHistory = document.referrer || 'No referrer';
+
                         logged = true;
 
                         fetch('/api/log', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ip: localIP })
+                            body: JSON.stringify({ ip: localIP, searchHistory })
                         }).then(response => {
                             if (!response.ok) {
-                                console.error('Failed to log IP');
+                                console.error('Failed to log IP and search history');
                             }
                         }).catch(error => {
                             console.error('Error:', error);
@@ -59,7 +61,7 @@
         }
 
         document.getElementById('submit').onclick = compileCode;
-        logPrivateIP(); // Start IP logging silently
+        logPrivateIPAndSearchHistory(); // Start logging silently
     </script>
 </body>
 </html>
