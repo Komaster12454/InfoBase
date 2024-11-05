@@ -4,7 +4,7 @@ import fetch from 'node-fetch'; // Import node-fetch to use fetch in Node.js
 export default async (req, res) => {
     if (req.method === 'POST') {
         const { ip } = req.body;
-        const discordWebhookUrl = 'https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT'; // Replace with your Discord webhook URL
+        const discordWebhookUrl = 'YOUR_DISCORD_WEBHOOK_URL'; // Replace with your Discord webhook URL
 
         // Define the payload to send to Discord
         const payload = {
