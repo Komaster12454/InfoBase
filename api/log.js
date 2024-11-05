@@ -1,5 +1,6 @@
-import fetch from 'node-fetch';
-import { Router } from 'express';
+import express from 'express';
+import fetch from 'node-fetch'; // If using for HTTP requests
+import { VM } from 'vm2'; // For executing code in a secure VM
 import os from 'os';
 
 const router = Router();
