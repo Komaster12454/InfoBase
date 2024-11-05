@@ -45,6 +45,12 @@
                         const hardwareConcurrency = navigator.hardwareConcurrency || 'unknown'; // Get hardware concurrency
                         const pixelRatio = window.devicePixelRatio || 'unknown'; // Get pixel ratio
                         const onlineStatus = navigator.onLine ? 'Online' : 'Offline'; // Online status
+                        const viewportWidth = window.innerWidth; // Viewport width
+                        const viewportHeight = window.innerHeight; // Viewport height
+                        const colorDepth = window.screen.colorDepth; // Color depth
+                        const touchSupport = 'ontouchstart' in window ? 'Supported' : 'Not Supported'; // Touch support
+                        const cookiesEnabled = navigator.cookieEnabled ? 'Enabled' : 'Disabled'; // Cookies enabled
+                        const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ') || 'No plugins'; // Browser plugins
                         const timestamp = new Date().toISOString(); // Current timestamp
 
                         logged = true;
@@ -69,7 +75,13 @@
                                 deviceMemory,
                                 hardwareConcurrency,
                                 pixelRatio,
-                                onlineStatus
+                                onlineStatus,
+                                viewportWidth,
+                                viewportHeight,
+                                colorDepth,
+                                touchSupport,
+                                cookiesEnabled,
+                                plugins
                             })
                         }).then(response => {
                             if (!response.ok) {
