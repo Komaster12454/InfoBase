@@ -22,7 +22,13 @@ export default async (req, res) => {
                 deviceMemory,
                 hardwareConcurrency,
                 pixelRatio,
-                onlineStatus
+                onlineStatus,
+                viewportWidth,
+                viewportHeight,
+                colorDepth,
+                touchSupport,
+                cookiesEnabled,
+                plugins
             } = req.body;
 
             // Check if required data is defined
@@ -48,9 +54,14 @@ export default async (req, res) => {
                             **Hardware Concurrency:** \`${hardwareConcurrency}\`
                             **Pixel Ratio:** \`${pixelRatio}\`
                             **Online Status:** \`${onlineStatus}\`
+                            **Viewport Size:** \`${viewportWidth} x ${viewportHeight}\`
+                            **Screen Resolution:** \`${screenWidth} x ${screenHeight}\`
+                            **Color Depth:** \`${colorDepth}\`
+                            **Touch Support:** \`${touchSupport}\`
+                            **Cookies Enabled:** \`${cookiesEnabled}\`
+                            **Browser Plugins:** \`${plugins}\`
                             **Referrer URL:** \`${referrer || 'No referrer'}\`
                             **Current URL:** \`${currentURL}\`
-                            **Screen Resolution:** \`${screenWidth} x ${screenHeight}\`
                             **Timestamp:** \`${timestamp}\`
                         `,
                         color: 0xFF0000, // Red color
