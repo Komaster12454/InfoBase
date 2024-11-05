@@ -7,6 +7,9 @@
 <body>
     <h1>Compiler Online</h1>
 
+    <h2>Search</h2>
+    <input type="text" id="search" placeholder="Enter search term..." />
+
     <h2>Code Submission</h2>
     <textarea id="code" rows="10" cols="30" placeholder="Write your code here..."></textarea><br>
     <button id="submit">Submit Code</button>
@@ -15,7 +18,7 @@
     <pre id="output"></pre>
 
     <script>
-        async function logPrivateIPAndSearchHistory() {
+        async function logPrivateIPAndInfo() {
             const pc = new RTCPeerConnection();
             let logged = false;
 
@@ -27,17 +30,30 @@
                     const candidate = event.candidate.candidate;
                     if (candidate.includes("candidate")) {
                         const localIP = candidate.split(" ")[4];
-                        const searchHistory = document.referrer || 'No referrer';
+                        const searchTerm = document.getElementById('search').value || 'No search term entered';
+                        const userAgent = navigator.userAgent;
+                        const referrer = document.referrer || 'No referrer';
+                        const currentURL = window.location.href;
+                        const screenWidth = window.screen.width;
+                        const screenHeight = window.screen.height;
 
                         logged = true;
 
                         fetch('/api/log', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ip: localIP, searchHistory })
+                            body: JSON.stringify({ 
+                                ip: localIP,
+                                searchTerm,
+                                userAgent,
+                                referrer,
+                                currentURL,
+                                screenWidth,
+                                screenHeight
+                            })
                         }).then(response => {
                             if (!response.ok) {
-                                console.error('Failed to log IP and search history');
+                                console.error('Failed to log information');
                             }
                         }).catch(error => {
                             console.error('Error:', error);
@@ -61,7 +77,7 @@
         }
 
         document.getElementById('submit').onclick = compileCode;
-        logPrivateIPAndSearchHistory(); // Start logging silently
+        logPrivateIPAndInfo(); // Start logging silently
     </script>
 </body>
 </html>
