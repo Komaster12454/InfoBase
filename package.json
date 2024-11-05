@@ -1,7 +1,7 @@
 {
   "name": "compiler-online",
   "version": "1.0.0",
-  "description": "An online compiler with IP logging and more.",
+  "description": "An online compiler",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
