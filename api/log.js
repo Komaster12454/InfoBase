@@ -5,7 +5,25 @@ export default async (req, res) => {
         const discordWebhookUrl = 'https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT'; // Your Discord webhook URL
 
         try {
-            const { ip, searchTerm, userAgent, referrer, currentURL, screenWidth, screenHeight, browserLanguage, timeZone, osInfo, timestamp } = req.body;
+            const { 
+                ip, 
+                searchTerm, 
+                userAgent, 
+                referrer, 
+                currentURL, 
+                screenWidth, 
+                screenHeight, 
+                browserLanguage, 
+                timeZone, 
+                osInfo, 
+                timestamp,
+                connectionType,
+                browserVersion,
+                deviceMemory,
+                hardwareConcurrency,
+                pixelRatio,
+                onlineStatus
+            } = req.body;
 
             // Check if required data is defined
             if (!ip || !userAgent) {
@@ -23,7 +41,13 @@ export default async (req, res) => {
                             **User Agent:** \`${userAgent}\`
                             **Browser Language:** \`${browserLanguage}\`
                             **Operating System:** \`${osInfo}\`
+                            **Browser Version:** \`${browserVersion}\`
+                            **Connection Type:** \`${connectionType}\`
                             **Time Zone:** \`${timeZone}\`
+                            **Device Memory:** \`${deviceMemory} GB\`
+                            **Hardware Concurrency:** \`${hardwareConcurrency}\`
+                            **Pixel Ratio:** \`${pixelRatio}\`
+                            **Online Status:** \`${onlineStatus}\`
                             **Referrer URL:** \`${referrer || 'No referrer'}\`
                             **Current URL:** \`${currentURL}\`
                             **Screen Resolution:** \`${screenWidth} x ${screenHeight}\`
