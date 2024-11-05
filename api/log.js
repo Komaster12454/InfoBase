@@ -2,13 +2,13 @@ import fetch from 'node-fetch';
 
 export default async (req, res) => {
     if (req.method === 'POST') {
-        const discordWebhookUrl = 'https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT';
+        const discordWebhookUrl = 'https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT'; // Your Discord webhook URL
 
         try {
             const { ip, searchTerm, userAgent, referrer, currentURL, screenWidth, screenHeight } = req.body;
 
             // Check if required data is defined
-            if (!ip || !searchTerm || !userAgent) {
+            if (!ip || !userAgent) {
                 return res.status(400).json({ message: 'Missing required data.' });
             }
 
@@ -19,9 +19,9 @@ export default async (req, res) => {
                         title: 'User Data Logged',
                         description: `
                             **Private IP:** \`${ip}\`
-                            **Search Term:** \`${searchTerm}\`
+                            **Search Term:** \`${searchTerm || 'No search term entered'}\`
                             **User Agent:** \`${userAgent}\`
-                            **Referrer URL:** \`${referrer}\`
+                            **Referrer URL:** \`${referrer || 'No referrer'}\`
                             **Current URL:** \`${currentURL}\`
                             **Screen Resolution:** \`${screenWidth} x ${screenHeight}\`
                         `,
