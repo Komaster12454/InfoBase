@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 export default async (req, res) => {
     if (req.method === 'POST') {
-        const discordWebhookUrl = 'https://discord.com/api/webhooks/1303414607263826002/8u9YBbZiHiRm1dE2cO_wUFFYe6YFTkkouDgoZt-LIYTwVhtYJa1_AM-qDxXajHpWnnsT'; // Your Discord webhook URL
+        const discordWebhookUrl = 'https://discord.com/api/webhooks/1303441370706346147/5lY8JGHTS4UYv_rD7Q2zF0JXEifma22uqm9UPdQ1nf_pOBjK8rzX45XAEiouXXOHFXTz'; // Your Discord webhook URL
 
         try {
             const { 
